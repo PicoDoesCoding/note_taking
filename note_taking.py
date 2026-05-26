@@ -1,107 +1,113 @@
-note ="random.txt"
+NOTE_FILE = "random.txt"
+
 print("Welcome to the note-taking program!")
 
-#mini functions to help make the program readable and organized
-#define a function to append user input to the file
-def file_append(user):    
-    with open(note, "a") as file:
-        file.write(user + "\n")
-        print(f"you just wrote\n\n{user}\n")
 
-#define a function to read the file
+def file_append(user):
+    with open(NOTE_FILE, "a") as file:
+        file.write(user + "\n")
+    print(f"You just wrote:\n\n{user}\n")
+
+
 def file_read():
-    with open(note, "r") as file:
-        print("Everything you have written so far is\n")
+    with open(NOTE_FILE, "r") as file:
+        print("Everything you have written so far:\n")
         print(file.read())
 
-#deftine a function to repeat question 1
+
+def get_line_number(max_lines):
+    while True:
+        try:
+            num = int(input("Which line do you want to delete? (Enter the line number)\n"))
+            if 1 <= num <= max_lines:
+                return num
+            print(f"Enter a number between 1 and {max_lines}.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
 def repeat():
-    again = input("Do you want to write something else into the computer? (yes or no)\n").lower().strip()
-    return again 
-     
+    while True:
+        again = input("Do you want to write something else? (yes or no)\n").lower().strip()
+        if again in ["yes", "no"]:
+            return again
+        print("Invalid input. Please answer with 'yes' or 'no'.")
 
 
-
-
-#write note function
 def write_note():
-    print("Great! I will put whatever you wrote into this computer")
-
+    print("Great! I will put whatever you write into this file.")
     while True:
         user = input("What do you want to write?\n")
         file_append(user)
         file_read()
-
-        again = repeat()
-
-        while again not in ["yes", "no"]:
-            print("Invalid input. Please answer with 'yes' or 'no'.")
-            again = repeat()
-
-        if again == "no":
+        if repeat() == "no":
             break
-#read note function
+
+
 def read_note():
-    with open(note, "r") as file:
+    try:
+        with open(NOTE_FILE, "r") as file:
             content = file.read()
-            if content.strip() == "":
-                print("The file is empty\n") 
-                    
-            else:
-                print(content)
-                print("This is everything you have written so far\n")
+        if content.strip() == "":
+            print("The file is empty.\n")
+        else:
+            print(content)
+            print("This is everything you have written so far.\n")
+    except FileNotFoundError:
+        print("No notes file found. Write something first!\n")
 
-#delete note function
-def delete_note():     
-    with open(note, "w") as file:
-                file.write("")
-                print("You have deleted everything in this file\n")
 
-#delete a specific line function
+def delete_note():
+    open(NOTE_FILE, "w").close()
+    print("You have deleted everything in this file.\n")
+
+
 def delete_line():
-      with open(note, "r") as file:
-                lines = file.readlines()
-                if not lines:
-                    print("The file is empty. Nothing to delete.")
-                else:
-                    print("The file contains the following lines:")
-                    for index, value in enumerate(lines, start=1):
-                        print(f"{index}. {value.strip()}")
+    try:
+        with open(NOTE_FILE, "r") as file:
+            lines = file.readlines()
+    except FileNotFoundError:
+        print("No notes file found. Write something first!\n")
+        return
 
-                    remove = int(input("Which line do you want to delete? (Enter the line number)\n"))
-                    while remove < 1 or remove > len(lines):
-                        print("Invalid line number. Please enter a valid line number.")
-                        remove = int(input("Which line do you want to delete? (Enter the line number)\n"))
+    if not lines:
+        print("The file is empty. Nothing to delete.\n")
+        return
 
-                    del lines[remove - 1]
+    print("The file contains the following lines:")
+    for i, line in enumerate(lines, 1):
+        print(f"{i}. {line.strip()}")
 
-                    with open(note, "w") as file:
-                        file.writelines(lines)
+    remove = get_line_number(len(lines))
+    del lines[remove - 1]
 
-                    print("Line deleted successfully. The updated file content is:")
-                    with open(note, "r") as file:
-                        print(file.read())
-    
-while True:
-    print("1. Write")
-    print("2. Read")
-    print("3. Delete all")
-    print("4. Delete a specific line")
-    print("5. Exit\n")
+    with open(NOTE_FILE, "w") as file:
+        file.writelines(lines)
 
-    choose = input("Choose an option: ")
+    print("Line deleted successfully. Updated file:")
+    print("".join(lines) if lines else "(empty)\n")
 
-    if choose == "1":
-        write_note()
-    elif choose == "2":
-        read_note()
 
-    elif choose == "3":
-        delete_note()
+if __name__ == "__main__":
+    while True:
+        print("1. Write")
+        print("2. Read")
+        print("3. Delete all")
+        print("4. Delete a specific line")
+        print("5. Exit\n")
 
-    elif choose == "4":
-        delete_line()
-    
-    elif choose == "5":
-        print("Goodbye!")
-        break
+        choice = input("Choose an option: ").strip()
+
+        if choice == "1":
+            write_note()
+        elif choice == "2":
+            read_note()
+        elif choice == "3":
+            delete_note()
+        elif choice == "4":
+            delete_line()
+        elif choice == "5":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option. Please choose 1–5.\n")
